@@ -36,13 +36,12 @@ const INITIAL_MY_TRIPS = [
     title: "春の熱海 桜満喫ツアー",
     date: "2024/03/15",
     logs: [
-      { id: 1, name: "熱海駅", time: "10:00", category: "station", memo: "到着！いい天気。", photo: null },
-      { id: 2, name: "来宮神社 茶寮", time: "11:30", category: "sweets", memo: "大楠の迫力がすごい...", photo: "https://images.unsplash.com/photo-1579619639535-64539cc02243?auto=format&fit=crop&w=300&q=80" }
+      { id: "log-1", name: "熱海駅", time: "10:00", category: "station", memo: "到着！いい天気。", photo: null },
+      { id: "log-2", name: "来宮神社 茶寮", time: "11:30", category: "sweets", memo: "大楠の迫力がすごい...", photo: "https://images.unsplash.com/photo-1579619639535-64539cc02243?auto=format&fit=crop&w=300&q=80" }
     ],
-    // 地図上の手書き風メモ
     mapMemos: [
-      { id: 1, x: 120, y: 280, text: "ここからの眺め最高！" },
-      { id: 2, x: 260, y: 380, text: "坂道きつい..." }
+      { id: "memo-1", x: 120, y: 280, text: "ここからの眺め最高！" },
+      { id: "memo-2", x: 260, y: 380, text: "坂道きつい..." }
     ],
     stats: { dist: 2.5, spots: 2, photos: 1, calories: 150, steps: 3500 },
     isPublished: false 
@@ -63,8 +62,8 @@ const INITIAL_COMMUNITY_POSTS = [
     comment: "初めて熱海に来るなら絶対これ。駅→商店街→サンビーチの黄金ルートです。",
     tags: ["初心者", "景色"],
     mapMemos: [
-      { id: 1, x: 150, y: 230, text: "ここは絶対寄るべき" },
-      { id: 2, x: 220, y: 420, text: "夕日が綺麗でした" }
+      { id: "cm-1", x: 150, y: 230, text: "ここは絶対寄るべき" },
+      { id: "cm-2", x: 220, y: 420, text: "夕日が綺麗でした" }
     ]
   },
   {
@@ -79,9 +78,9 @@ const INITIAL_COMMUNITY_POSTS = [
     comment: "地図だけ見て近道だと思ったら、地獄の急階段でした...。ヒールで歩かせて激怒されました。",
     tags: ["失敗談", "階段注意"],
     mapMemos: [
-      { id: 1, x: 160, y: 320, text: "道まちがえた！" },
-      { id: 2, x: 200, y: 360, text: "ここ階段地獄..." },
-      { id: 3, x: 240, y: 400, text: "疲れたと言われる" }
+      { id: "cm-3", x: 160, y: 320, text: "道まちがえた！" },
+      { id: "cm-4", x: 200, y: 360, text: "ここ階段地獄..." },
+      { id: "cm-5", x: 240, y: 400, text: "疲れたと言われる" }
     ]
   }
 ];
@@ -90,7 +89,7 @@ export default function AtamiGoApp() {
   const [activeTab, setActiveTab] = useState('home');
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [selectedShop, setSelectedShop] = useState(null);
-  const [viewMode, setViewMode] = useState('main'); // main, shop_detail, post_detail, my_trip_detail
+  const [viewMode, setViewMode] = useState('main'); 
 
   // --- ルート検索機能 ---
   const [searchState, setSearchState] = useState('idle'); 
@@ -100,15 +99,12 @@ export default function AtamiGoApp() {
 
   // --- 旅ログ・保存機能 ---
   const [history, setHistory] = useState([]); 
-  const [myTrips, setMyTrips] = useState(INITIAL_MY_TRIPS); // 自分の旅 (Activity)
-  const [communityPosts, setCommunityPosts] = useState(INITIAL_COMMUNITY_POSTS); // みんなの旅 (Community)
+  const [myTrips, setMyTrips] = useState(INITIAL_MY_TRIPS); 
+  const [communityPosts, setCommunityPosts] = useState(INITIAL_COMMUNITY_POSTS); 
   
   const [viewingTrip, setViewingTrip] = useState(null); 
   const [showSaveModal, setShowSaveModal] = useState(false); 
   const [tripTitle, setTripTitle] = useState(""); 
-
-  // --- マップメモ機能（編集用）---
-  const [editingMemos, setEditingMemos] = useState([]);
 
   // --- ユーザーデータ ---
   const [userPoints, setUserPoints] = useState(850); 
@@ -133,26 +129,20 @@ export default function AtamiGoApp() {
 
   // マップをクリックしてメモを追加する機能
   const handleDetailMapClick = (e, isEditing = false) => {
-    if (!isEditing) return; // 編集モードでなければ何もしない（今回は常に編集可とする簡易実装）
+    if (!isEditing) return; 
 
-    // 画像上のクリック座標を取得
     const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left; // 画像内の相対X座標
-    const y = e.clientY - rect.top;  // 画像内の相対Y座標
+    const x = e.clientX - rect.left; 
+    const y = e.clientY - rect.top;  
 
-    // 簡易プロンプトで入力（本来はモーダルが良い）
     const text = window.prompt("この場所へのメモを入力してください（例：坂道きつい！）", "");
     if (text) {
-      const newMemo = { id: Date.now(), x, y, text };
+      const newMemo = { id: Date.now() + Math.random(), x, y, text };
       
-      // 表示中の投稿または旅データのメモを更新
       if (viewMode === 'post_detail' && selectedPost) {
-        // コミュニティ投稿のメモ更新（ローカル表示のみ更新）
         setSelectedPost(prev => ({...prev, mapMemos: [...(prev.mapMemos || []), newMemo]}));
       } else if (viewMode === 'my_trip_detail' && viewingTrip) {
-        // 自分の旅のメモ更新
         setViewingTrip(prev => ({...prev, mapMemos: [...(prev.mapMemos || []), newMemo]}));
-        // 元データも更新（永続化のため）
         setMyTrips(prev => prev.map(t => t.id === viewingTrip.id ? {...t, mapMemos: [...(t.mapMemos || []), newMemo]} : t));
       }
     }
@@ -170,13 +160,13 @@ export default function AtamiGoApp() {
     };
 
     const newTrip = {
-      id: Date.now(),
+      id: Date.now() + Math.random(), // ID重複防止
       title: tripTitle,
       date: new Date().toLocaleDateString(),
       logs: [...history],
       stats: stats,
       isPublished: false,
-      mapMemos: [] // 新規保存時はメモなし
+      mapMemos: [] 
     };
 
     setMyTrips([newTrip, ...myTrips]);
@@ -187,25 +177,25 @@ export default function AtamiGoApp() {
     }));
 
     setHistory([]); setWalkPath([]); setIsTracking(false); setShowSaveModal(false); setTripTitle("");
-    alert("旅の記録を保存しました！\n「足跡」タブで詳細にメモを追加できます。");
+    alert("旅の記録を保存しました！\n「足跡」タブで確認できます。");
     setActiveTab('activity');
   };
 
-  // 2. コミュニティへ投稿 (Activity -> Community)
+  // 2. コミュニティへ投稿
   const handlePublishTrip = (trip) => {
     if(trip.isPublished) return;
     
     const newPost = {
       ...trip,
-      id: Date.now() + 1, 
+      id: Date.now() + Math.random(), // ID重複防止
       author: "自分",
       avatar: "😎",
       likes: 0,
       isMyPost: true,
-      pathType: "relax",
+      pathType: "relax", 
       comment: "楽しかった熱海の旅をシェアします！",
       tags: ["旅の記録"],
-      mapMemos: trip.mapMemos || [] // メモも引き継ぐ
+      mapMemos: trip.mapMemos || [] 
     };
 
     setCommunityPosts([newPost, ...communityPosts]);
@@ -223,7 +213,7 @@ export default function AtamiGoApp() {
     ));
   };
 
-  // --- 以下、既存の地図・GPSロジック ---
+  // --- GPS & ジオフェンス (重要修正箇所) ---
   const checkGeofence = (pos) => {
     SHOPS.forEach(shop => {
       const distance = Math.sqrt(Math.pow(shop.x - pos.x, 2) + Math.pow(shop.y - pos.y, 2));
@@ -232,8 +222,22 @@ export default function AtamiGoApp() {
         setHistory(prev => {
           const lastVisit = prev[prev.length - 1];
           if (lastVisit && lastVisit.shopId === shop.id) return prev;
-          const uniqueId = `${Date.now()}-${shop.id}-${Math.random().toString(36).substr(2, 9)}`;
-          return [...prev, { id: uniqueId, shopId: shop.id, name: shop.name, category: shop.category, time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }), x: shop.x, y: shop.y, auto: true, memo: "", photo: null }];
+          
+          // 【修正】IDを完全にユニークにする (時刻 + ショップID + 乱数)
+          const uniqueId = `${Date.now()}-${shop.id}-${Math.random().toString(36).slice(2)}`;
+          
+          return [...prev, { 
+            id: uniqueId, 
+            shopId: shop.id, 
+            name: shop.name, 
+            category: shop.category, 
+            time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }), 
+            x: shop.x, 
+            y: shop.y, 
+            auto: true, 
+            memo: "", 
+            photo: null 
+          }];
         });
       }
     });
@@ -301,7 +305,6 @@ export default function AtamiGoApp() {
                 </button>
               </div>
             )}
-            {/* 記録中の保存ボタン */}
             {activeTab === 'activity' && history.length > 0 && !viewingTrip && (
               <button onClick={() => setShowSaveModal(true)} className="text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-md px-4 py-2 rounded-full flex items-center gap-2 transition">
                 <Save size={14} /> 記録を終了
@@ -318,7 +321,6 @@ export default function AtamiGoApp() {
         {activeTab === 'activity' && (
           <div className="p-6 animate-fade-in">
             {viewMode === 'my_trip_detail' && viewingTrip ? (
-              // 自分の過去の旅の詳細
               <div className="animate-slide-up">
                 <div className="mb-6 flex justify-between items-start">
                   <div>
@@ -334,39 +336,27 @@ export default function AtamiGoApp() {
                   )}
                 </div>
 
-                {/* 詳細地図 (メモ機能付き) */}
                 <div className="bg-white p-1 rounded-2xl shadow-md border border-slate-100 mb-6 overflow-hidden relative">
                   <div className="h-64 bg-slate-200 relative shrink-0 group">
-                    {/* 背景画像 */}
                     <img 
                       src="https://t4.ftcdn.net/jpg/00/99/99/09/360_F_99990959_X9br1OL3yzzK1ExqUINpG5BARe2Jchuz.jpg" 
                       alt="Map" 
                       className="w-full h-full object-cover opacity-80" 
-                      // クリックでメモを追加するためのイベント
                       onClick={(e) => handleDetailMapClick(e, true)}
                     />
-                    
-                    {/* 地図クリックのヒント（ホバー時など） */}
                     <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full pointer-events-none">
                       タップしてメモを追加
                     </div>
-
                     <svg className="absolute inset-0 w-full h-full pointer-events-none filter drop-shadow-md z-0">
-                      {/* ダミールート描画 */}
                       <path d="M140,250 Q200,300 240,400" fill="none" stroke="#0ea5e9" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="animate-ants-line opacity-80" />
                       <circle cx="140" cy="250" r="6" fill="white" stroke="#3b82f6" strokeWidth="3" />
                       <circle cx="240" cy="400" r="6" fill="white" stroke="#ef4444" strokeWidth="3" />
-                      
-                      {/* メモ（吹き出し）の描画 */}
                       {viewingTrip.mapMemos && viewingTrip.mapMemos.map((memo, i) => (
                         <g key={i} transform={`translate(${memo.x}, ${memo.y})`}>
                           <circle r="6" fill="#f97316" stroke="white" strokeWidth="2" className="animate-bounce-short"/>
                           <g transform="translate(0, -10)">
-                            {/* 吹き出しの背景 */}
                             <rect x="-60" y="-35" width="120" height="30" rx="8" fill="white" className="drop-shadow-lg" stroke="#f97316" strokeWidth="1"/>
-                            {/* 三角（吹き出しの足） */}
                             <path d="M-5,-5 L0,5 L5,-5 Z" fill="white" stroke="#f97316" strokeWidth="0"/>
-                            {/* テキスト */}
                             <text x="0" y="-17" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#334155" style={{fontFamily: "'Noto Sans JP', sans-serif"}}>{memo.text}</text>
                           </g>
                         </g>
@@ -375,7 +365,6 @@ export default function AtamiGoApp() {
                   </div>
                 </div>
 
-                {/* ログ一覧 */}
                 <div className="space-y-0">
                   {viewingTrip.logs.map((log, i) => (
                     <div key={log.id} className="flex gap-4 group">
@@ -395,7 +384,6 @@ export default function AtamiGoApp() {
                 </div>
               </div>
             ) : (
-              // 自分の一覧画面 (省略せず記述)
               <div className="space-y-8">
                 <div>
                   <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><Trophy className="text-yellow-500"/> マイデータ</h2>
@@ -468,7 +456,6 @@ export default function AtamiGoApp() {
         {/* === TAB 5: コミュニティ (みんなの旅路) === */}
         {activeTab === 'community' && viewMode === 'main' && (
           <div className="p-5 animate-fade-in">
-            {/* ポイントカード (省略せず記述) */}
             <div className="bg-gradient-to-r from-sky-500 to-indigo-600 p-5 rounded-2xl shadow-lg text-white mb-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
               <div className="flex justify-between items-center relative z-10">
@@ -530,15 +517,12 @@ export default function AtamiGoApp() {
                   src="https://t4.ftcdn.net/jpg/00/99/99/09/360_F_99990959_X9br1OL3yzzK1ExqUINpG5BARe2Jchuz.jpg" 
                   alt="Map" 
                   className="w-full h-full object-cover opacity-80" 
-                  // 投稿詳細でも（もし自分なら）編集できるが、今回は閲覧のみとする
-                  // onClick={(e) => handleDetailMapClick(e, selectedPost.isMyPost)}
                 />
               </div>
               <svg className="absolute inset-0 w-full h-full pointer-events-none filter drop-shadow-md z-0">
                 <path d={selectedPost.pathType === 'hard' ? "M140,250 L120,300 L160,350 L100,400 L240,400" : "M140,250 Q200,300 240,400"} fill="none" stroke={selectedPost.pathType === 'hard' ? "#ef4444" : "#0ea5e9"} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="animate-ants-line opacity-80" />
                 <circle cx="140" cy="250" r="6" fill="white" stroke="#3b82f6" strokeWidth="3" /><circle cx="240" cy="400" r="6" fill="white" stroke="#ef4444" strokeWidth="3" />
                 
-                {/* 投稿のメモ（吹き出し）表示 */}
                 {selectedPost.mapMemos && selectedPost.mapMemos.map((memo, i) => (
                   <g key={i} transform={`translate(${memo.x}, ${memo.y})`}>
                     <circle r="6" fill={selectedPost.pathType === 'hard' ? "#ef4444" : "#0ea5e9"} stroke="white" strokeWidth="2" className="animate-bounce-short"/>
@@ -639,7 +623,7 @@ export default function AtamiGoApp() {
 
       </main>
 
-      {/* ボトムナビゲーション (5タブ構成に変更) */}
+      {/* ボトムナビゲーション (5タブ構成) */}
       <nav className="h-24 bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-around items-start pt-4 px-2 fixed bottom-0 w-full max-w-md z-40 shadow-sm">
         <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1.5 w-16 group ${activeTab === 'home' ? 'text-sky-500' : 'text-slate-400'}`}><Home size={24} /><span className="text-[10px] font-bold">ホーム</span></button>
         <button onClick={() => setActiveTab('search')} className={`flex flex-col items-center gap-1.5 w-16 group ${activeTab === 'search' ? 'text-sky-500' : 'text-slate-400'}`}><Search size={24} /><span className="text-[10px] font-bold">探す</span></button>
