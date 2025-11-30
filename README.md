@@ -1,2 +1,3 @@
-# sw-atami3-taka
+# StartupWeekend熱海3th
 StartupWeekend熱海3thたかチームのプロダクト（MVP）
+プレゼンに使用した実際のMVPデータです
